@@ -3,7 +3,7 @@
 * @Date:   06-Feb-172017
 * @Filename: index.js
 * @Last modified by:   john
-* @Last modified time: 09-Feb-172017
+* @Last modified time: 17-Feb-172017
 */
 var rows, columns, minc, cells;
 var firstline = true;
@@ -61,9 +61,9 @@ function processPizzaLine(line)
 }
 
 function quickSolution(fullPizza){
-  var column =0;
-  var row = 0;
-  while(column<parseInt(columns) && row<parseInt(rows)){
+  var column =parseInt(columns)-1;
+  var row = parseInt(rows)-1;
+  while(column>=0 && row>=0){
   //for(column =0 ; column<columns; column=(column+(cells/2))){
   //  for(row =0 ; row<rows; row=(row+(cells/2))){
         var currentSlice=[];
@@ -96,8 +96,8 @@ function quickSolution(fullPizza){
 
 
           }
-          row = row +r;
-          column = column+c;
+          row = row -r;
+          column = column-c;
         }
       }
         if(flag){
