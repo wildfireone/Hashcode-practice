@@ -12,7 +12,11 @@ var slices = [];
 var filename;
 var lineNo = 0;
 
+var rowcheck = 1;
+var columncheck = 1;
+
 var fs = require('fs')
+var Genetic = require('genetic-js-no-ww')
 // again
 process.argv.forEach(function(val, index, array) {
   filename = val;
@@ -35,9 +39,13 @@ lr.on('line', function(line) {
 lr.on('end', function() {
   // All lines are read, file is closed now.
   //console.log(fullpizza);
-  quickSolution(fullpizza);
-  //console.log(slices);
-  writeOutput(slices);
+
+    quickSolution(fullpizza,minc,minc);
+    console.log(slices.length);
+    writeOutput(slices);
+  //goGenetics();
+
+
 });
 
 function processPizzaLine(line) {
@@ -58,22 +66,22 @@ function processPizzaLine(line) {
   }
 }
 
-function quickSolution(fullPizza) {
+function quickSolution(fullPizza,rowcheck,colcheck) {
+  var slices = [];
   var column = 0;
   var row = 0;
   var startrow = 0;
   var startcolumn = 0;
   var endrow = 0;
   var endcolumn = 0;
-
+var counter =0;
   for (column = 0; column < columns; column++) {
     for (row = 0; row < rows; row++) {
       //console.log(row+":"+column);
       var currentSlice = [];
       var tcount = 0;
       var mcount = 0;
-      var rowcheck = 1;
-      var columncheck = 1;
+
 
       //var slice = [row+" ", column+" ", (Math.min(row+(cells-1),rows-1))+" ", column+" "];
 //console.log("before");
@@ -94,11 +102,13 @@ function quickSolution(fullPizza) {
             //for (var r = startrow; r < Math.min(startrow+rowcheck, rows); r++) {
               var c = startcolumn;
               var r = startrow;
-
-              while(c < Math.min(startcolumn+(minc), columns)&&!bust){
+//console.log(entity);
+              while(c < Math.min(startcolumn+(colcheck), columns)&&!bust){
+                //console.log("col"+parseInt(entity[counter]));
               r = startrow;
-              while(r < Math.min(startrow+(minc), rows)&&!bust){
-
+              while(r < Math.min(startrow+(rowcheck), rows)&&!bust){
+                //console.log("row"+parseInt(entity[counter]));
+              counter++;
               if (fullPizza[r][c] === 'T') {
                 tcount++;
               }
@@ -134,7 +144,7 @@ function quickSolution(fullPizza) {
           }
         if (flag) {
          //console.log(fullPizza);
-          storeSlice(fullPizza,startrow, startcolumn, r, c);
+          storeSlice(fullPizza,startrow, startcolumn, r-1, c-1);
           //break checkingloop;
           //for(var x = startcolumn; x<(c-1);x++){
           //  for(var y = startrow; y<(r-1);y++){
@@ -148,6 +158,8 @@ function quickSolution(fullPizza) {
       //}
     }
   }
+
+  return slices.length;
 }
 
 function storeSlice(fullPizza,startr, startc, endr, endc) {
@@ -166,7 +178,7 @@ function storeSlice(fullPizza,startr, startc, endr, endc) {
 }
 
 function writeOutput(slices) {
-  console.log(slices.length);
+  //console.log(slices.length);
   var logger = fs.createWriteStream(filename + ".out", {
     flags: 'w' // 'a' means appending (old data will be preserved)
   });
@@ -197,3 +209,93 @@ function writeOutput(slices) {
 // //       }
 // //     }
 // }
+
+var lastscore =0;
+
+var genetic = Genetic.create();
+genetic.optimize = Genetic.Optimize.Maximize;
+genetic.select1 = Genetic.Select1.Tournament2;
+genetic.select2 = Genetic.Select2.Tournament2;
+
+
+goGenetics = function(){
+
+  var config = {
+			"iterations": 40000
+			, "size": 250
+			, "crossover": 0.3
+			, "mutation": 0.3
+			, "skip": 20
+		};
+  //quickSolution(fullpizza,rowcheck,columncheck);
+  //console.log(slices);
+
+  genetic.evolve(config);
+  //writeOutput(slices);
+}
+
+genetic.seed = function() {
+
+  function randomString(len) {
+		var text = "";
+		var charset = "123456";
+		for(var i=0;i<len;i++)
+			text += charset.charAt(Math.floor(Math.random() * charset.length));
+
+		return text;
+	}
+
+	// create random strings that are equal in length to solution
+	return randomString((rows*columns)/minc);
+};
+genetic.mutate = function(entity) {
+
+	function replaceAt(str, index, character) {
+		return str.substr(0, index) + character + str.substr(index+character.length);
+	}
+
+	// chromosomal drift
+	var i = Math.floor(Math.random()*entity.length)
+	return replaceAt(entity, i, String.fromCharCode(entity.charCodeAt(i) + (Math.floor(Math.random()*2) ? 1 : -1)));
+};
+genetic.crossover = function(mother, father) {
+	// two-point crossover
+	var len = mother.length;
+	var ca = Math.floor(Math.random()*len);
+	var cb = Math.floor(Math.random()*len);
+	if (ca > cb) {
+		var tmp = cb;
+		cb = ca;
+		ca = tmp;
+	}
+
+	var son = father.substr(0,ca) + mother.substr(ca, cb-ca) + father.substr(cb);
+	var daughter = mother.substr(0,ca) + father.substr(ca, cb-ca) + mother.substr(cb);
+
+	return [son, daughter];
+};
+
+
+genetic.fitness = function(entity) {
+	var fitness = 0;
+
+  fitness = quickSolution(fullpizza,entity);
+  if(fitness>0){
+    console.log(fitness);
+  }
+	//var i;
+	//for (i=0;i<entity.length;++i) {
+		// increase fitness for each character that matches
+	//	if (entity[i] == this.userData["solution"][i])
+	//		fitness += 1;
+
+		// award fractions of a point as we get warmer
+	//	fitness += (127-Math.abs(entity.charCodeAt(i) - this.userData["solution"].charCodeAt(i)))/50;
+//	}
+	return fitness;
+};
+
+genetic.generation = function(pop, generation, stats) {
+	// stop running once we've reached the solution
+	return true;
+};

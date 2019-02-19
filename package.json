@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/wildfireone/Hashcode-practice/issues"
   },
-  "homepage": "https://github.com/wildfireone/Hashcode-practice#readme"
+  "homepage": "https://github.com/wildfireone/Hashcode-practice#readme",
+  "dependencies": {
+    "genetic": "^0.3.1",
+    "genetic-js": "^0.1.14",
+    "genetic-js-no-ww": "^0.2.1",
+    "line-by-line": "^0.1.6"
+  }
 }

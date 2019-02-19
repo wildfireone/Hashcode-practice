@@ -72,8 +72,8 @@ function quickSolution(fullPizza) {
       var currentSlice = [];
       var tcount = 0;
       var mcount = 0;
-      var rowcheck = 1;
-      var columncheck = 1;
+      var rowcheck = cells/2;
+      var columncheck = cells/rowcheck;
 
       //var slice = [row+" ", column+" ", (Math.min(row+(cells-1),rows-1))+" ", column+" "];
 //console.log("before");
@@ -81,7 +81,6 @@ function quickSolution(fullPizza) {
 
 //for(var span =1; span<=cells; span++){
   flag = false;
-  bust = false;
 
       if (isNaN(fullPizza[row][column])) {
         //console.log("after");
@@ -95,9 +94,9 @@ function quickSolution(fullPizza) {
               var c = startcolumn;
               var r = startrow;
 
-              while(c < Math.min(startcolumn+(minc), columns)&&!bust){
+              while(c < Math.min(startcolumn+(columncheck), columns) ){
               r = startrow;
-              while(r < Math.min(startrow+(minc), rows)&&!bust){
+              while(r < Math.min(startrow+(rowcheck), rows) ){
 
               if (fullPizza[r][c] === 'T') {
                 tcount++;
@@ -105,16 +104,14 @@ function quickSolution(fullPizza) {
               if (fullPizza[r][c] === 'M') {
                 mcount++;
               }
-
-              if(mcount+tcount > cells){bust = true;}
               //if(!flag){
               fullPizza[r][c] = slices.length;
             //}
               //console.log(tcount+":"+mcount);
-              if ((parseInt(tcount) >= parseInt(minc)) && (parseInt(mcount) >= parseInt(minc)) && !bust) {
+              if ((parseInt(tcount) >= parseInt(minc)) && (parseInt(mcount) >= parseInt(minc))) {
 
                 flag = true;
-                //storeSlice(startrow, startcolumn, r, c);
+
 
                 //flag=false;
                 ////break checkingloop;
@@ -126,15 +123,14 @@ function quickSolution(fullPizza) {
 
                 //break checkingloop;
               }
-
-
               r++;
             }
             c++;
           }
         if (flag) {
-         //console.log(fullPizza);
-          storeSlice(fullPizza,startrow, startcolumn, r, c);
+          storeSlice(startrow, startcolumn, r-1, c-1);
+        //  console.log(fullPizza);
+          //storeSlice(startrow, startcolumn, r-1, c-1);
           //break checkingloop;
           //for(var x = startcolumn; x<(c-1);x++){
           //  for(var y = startrow; y<(r-1);y++){
@@ -150,15 +146,10 @@ function quickSolution(fullPizza) {
   }
 }
 
-function storeSlice(fullPizza,startr, startc, endr, endc) {
+function storeSlice(startr, startc, endr, endc) {
   var slice = [startr + " ", startc + " ", endr + " ", endc + " "];
   //var width = endc-startc;
   //var height = endr-startr;
-  //for(var x = startc; x<endc;x++){
-  //  for(var y = startr; y<endr;y++){
-  //      fullPizza[y][x] = slices.length;
-  //  }
-  //}
 
 
 
